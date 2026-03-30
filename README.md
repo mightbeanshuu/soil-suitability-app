@@ -22,7 +22,7 @@ Build a **real-time full-stack web application** that:
 | Backend | Python — FastAPI |
 | Real-time Communication | WebSockets (FastAPI WebSocket) |
 | Dataset Matching | Pandas + Scikit-learn |
-| Frontend | HTML + CSS + Vanilla JS (or React) |
+| Frontend | HTML + CSS + React |
 | Database (optional logging) | SQLite via SQLAlchemy |
 
 ---
