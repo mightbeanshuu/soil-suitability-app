@@ -92,6 +92,20 @@ def connect_to_sensor_ip(config: SensorConfig):
         "message": f"Could not reach sensor at {connected_sensor_ip}. Verification failed."
     }
 
+@app.post("/sensor/disconnect")
+def disconnect_sensor():
+    """Disconnect from the current sensor and reset state"""
+    global connected_sensor_ip, latest_sensor_data, is_simulating
+    prev_ip = connected_sensor_ip
+    connected_sensor_ip = None
+    latest_sensor_data = {"N": 0, "P": 0, "K": 0, "pH": 7.0, "moisture": 0}
+    is_simulating = False
+    print(f"Sensor disconnected (was: {prev_ip})")
+    return {
+        "status": "disconnected",
+        "message": f"Successfully disconnected from {prev_ip}" if prev_ip else "No sensor was connected."
+    }
+
 @app.get("/sensor/status")
 def check_sensor_status():
     global connected_sensor_ip

@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import './index.css';
 
+// New modular components
+import DisconnectButton from './components/DisconnectButton';
+import WeatherWidget from './components/WeatherWidget';
+import LightSensor from './components/LightSensor';
+import BarometricPressure from './components/BarometricPressure';
+import { safe, hasValue } from './utils/sensorHelpers';
+
 const API_HTTP = "http://localhost:8000";
 
 function App() {
@@ -14,6 +21,7 @@ function App() {
   const [sensorIP, setSensorIP] = useState('');
   const [connectionStatus, setConnectionStatus] = useState(null);
   const [liveMode, setLiveMode] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -25,11 +33,7 @@ function App() {
         fetch(`${API_HTTP}/sensor`)
           .then(res => res.json())
           .then(res => {
-             // In live mode, we only want to update the data state if evaluations are already done
-             // or just update raw data for the readings card
              if (data) {
-                // If we already have an evaluation, update just the current values
-                // This keeps the suitability and recommendations intact while showing live values
                 setData(prev => {
                    if (!prev) return prev;
                    const updatedParams = { ...prev.params };
@@ -39,7 +43,6 @@ function App() {
                    return { ...prev, params: updatedParams, sensor_raw: res };
                 });
              } else {
-                // If no evaluation yet, just update sensor_raw for the live readings card
                 setData(prev => ({ 
                    crop: prev?.crop || '', 
                    params: prev?.params || {},
@@ -50,7 +53,7 @@ function App() {
              }
           })
           .catch(err => console.error("Live fetch error", err));
-      }, 500); // 500ms for a balance of real-time feel and stability
+      }, 500);
     } else {
       clearInterval(interval);
     }
@@ -58,7 +61,6 @@ function App() {
   }, [liveMode, data]);
 
   useEffect(() => {
-    // Fetch crops on mount
     fetch(`${API_HTTP}/crops`)
       .then(res => res.json())
       .then(res => {
@@ -69,7 +71,6 @@ function App() {
       })
       .catch(err => {
         console.error("Failed to fetch crops", err);
-        // Do not crash fully, just let it load indefinitely or display a silent error
         setError("Could not connect to backend API.");
       });
   }, []);
@@ -92,8 +93,8 @@ function App() {
            message: payload.message,
            raw: payload.raw_data
         });
+        setIsConnected(payload.status === 'success');
         
-        // Try fetching evaluation data if crop is selected
         if (selectedCrop) {
            fetchEvaluation();
         } else {
@@ -105,6 +106,14 @@ function App() {
         setError("Failed to communicate with API to connect sensor.");
         setLoading(false);
       });
+  };
+
+  const handleDisconnect = (message) => {
+    setIsConnected(false);
+    setConnectionStatus({ status: 'disconnected', message: message });
+    setData(null);
+    setLiveMode(false);
+    setLastUpdated(null);
   };
 
   const checkConnection = () => {
@@ -120,6 +129,7 @@ function App() {
            message: payload.message,
            raw: payload.raw_data
         });
+        setIsConnected(payload.status === 'success');
       })
       .catch(err => {
         console.error("Failed to check sensor status", err);
@@ -140,7 +150,7 @@ function App() {
       P: params.P?.value || 0,
       K: params.K?.value || 0,
       pH: params.pH?.value || 7,
-      moisture: 45 // Dummy value as not in field
+      moisture: 45
     };
 
     fetch(`${API_HTTP}/api/analyze`, {
@@ -166,7 +176,6 @@ function App() {
     setAiAnalysis(null);
     setData(null);
 
-    // Pass the IP from state to the backend so it can 'connect' on the fly if needed
     const url = sensorIP 
       ? `${API_HTTP}/connect_sensor?ip=${encodeURIComponent(sensorIP)}`
       : `${API_HTTP}/connect_sensor`;
@@ -182,12 +191,11 @@ function App() {
         if (payload.error) {
           setError(payload.error);
         } else {
-          // If we have an IP, update the connection hub status automatically
+          setIsConnected(true);
           if (sensorIP) {
              checkConnection();
           }
           
-          // Immediately evaluate the fetched data for the selected crop
           if (selectedCrop) {
             fetchEvaluation();
           }
@@ -241,6 +249,12 @@ function App() {
           <span className="app-subtitle">Real-Time Soil Suitability</span>
         </div>
         <div className="header-actions">
+           <DisconnectButton 
+              isConnected={isConnected} 
+              apiBase={API_HTTP} 
+              onDisconnect={handleDisconnect}
+           />
+           
            <div className="toggle-container">
              <span className="toggle-text">Show AI Insights</span>
              <label className="toggle-switch">
@@ -268,6 +282,7 @@ function App() {
       </header>
 
       <main className="main-content">
+        {/* Connection Hub */}
         <div className="controls" style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           <label htmlFor="sensorIP">Sensor IP:</label>
           <input 
@@ -324,26 +339,20 @@ function App() {
           </button>
           
           {connectionStatus && (
-            <div style={{
-              padding: '0.5rem 1rem', 
-              borderRadius: '8px', 
-              fontSize: '0.85rem',
-              maxWidth: '300px',
-              backgroundColor: connectionStatus.status === 'success' 
-                ? 'rgba(40,167,69,0.1)' 
-                : 'rgba(255,193,7,0.1)',
-              border: `1px solid ${connectionStatus.status === 'success' ? '#28a745' : '#ffc107'}`, 
-              color: connectionStatus.status === 'success' ? '#28a745' : '#eab34e',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.2rem'
-            }}>
-              <strong>{connectionStatus.status === 'success' ? 'Connected' : 'Connection Hub'}</strong>
-              <span>{connectionStatus.message}</span>
+            <div className={`connection-status-badge connection-status-badge--${connectionStatus.status}`}>
+              <span className="connection-status-dot" />
+              <div className="connection-status-text">
+                <strong>
+                  {connectionStatus.status === 'success' ? 'Connected' : 
+                   connectionStatus.status === 'disconnected' ? 'Disconnected' : 'Connection Hub'}
+                </strong>
+                <span>{connectionStatus.message}</span>
+              </div>
             </div>
           )}
         </div>
 
+        {/* Crop Selection & Fetch */}
         <div className="controls" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <label htmlFor="cropSelect">Target Crop Profile:</label>
           <select 
@@ -385,9 +394,9 @@ function App() {
           
           <div className="divider" style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 0.5rem' }}></div>
           
-          <label htmlFor="cropSelect">Preview Crop Suitability:</label>
+          <label htmlFor="cropSelectPreview">Preview Crop Suitability:</label>
           <select 
-            id="cropSelect" 
+            id="cropSelectPreview" 
             value={selectedCrop} 
             onChange={handleCropChange}
             disabled={crops.length === 0}
@@ -439,87 +448,31 @@ function App() {
         ) : (
           <div className="dashboard-grid">
             
-            {/* Sensor Readings Card */}
+            {/* ── NEW: Environmental Sensor Cards ── */}
+            <WeatherWidget sensorRaw={data.sensor_raw} isConnected={isConnected} />
+            <LightSensor sensorRaw={data.sensor_raw} isConnected={isConnected} />
+            <BarometricPressure sensorRaw={data.sensor_raw} isConnected={isConnected} />
+
+            {/* Soil NPK Readings Card */}
             <div className="card">
-               <h2>📡 Live Sensor Readings</h2>
-                {/* Soil Nutrients (NPK/pH) */}
+               <h2>🧪 Soil NPK Readings</h2>
                 {['N', 'P', 'K', 'pH'].map(param => (
                   <div className="data-row" key={param}>
                      <span className="data-label">
                        {param === 'pH' ? 'pH Level' : `${param} (mg/kg)`}
                      </span>
                      <div className="data-value">
-                       {data.params[param]?.value}
-                       <span className={`badge status-${data.params[param]?.status}`}>
-                         {data.params[param]?.status}
+                       <span className={!hasValue(data.params[param]?.value) ? 'na-value' : ''}>
+                         {safe(data.params[param]?.value)}
                        </span>
+                       {hasValue(data.params[param]?.value) && (
+                         <span className={`badge status-${data.params[param]?.status}`}>
+                           {data.params[param]?.status}
+                         </span>
+                       )}
                      </div>
                   </div>
                 ))}
-
-                {/* Environmental Conditions (DHT22, Rain, etc) */}
-                {data.sensor_raw?.dht22 && (
-                  <>
-                    <div className="data-row" style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '0.8rem' }}>
-                       <span className="data-label">Ambient Temp</span>
-                       <div className="data-value">{data.sensor_raw.dht22.temp_c}°C / {data.sensor_raw.dht22.temp_f}°F</div>
-                    </div>
-                    <div className="data-row">
-                       <span className="data-label">Humidity</span>
-                       <div className="data-value">{data.sensor_raw.dht22.humidity}%</div>
-                    </div>
-                  </>
-                )}
-                
-                {data.sensor_raw?.ds18b20 && (
-                  <div className="data-row">
-                     <span className="data-label">Soil Probe Temp</span>
-                     <div className="data-value">
-                        {data.sensor_raw.ds18b20.temp_c}°C
-                     </div>
-                  </div>
-                )}
-
-                {data.sensor_raw?.rain && (
-                  <div className="data-row" style={{ borderBottom: 'none', background: 'rgba(234, 179, 78, 0.05)', padding: '1rem', borderRadius: '12px', marginTop: '1rem', border: '1px solid var(--border)' }}>
-                     <span className="data-label" style={{ fontWeight: 'bold', color: 'var(--accent2)' }}>RAINFALL DETECTION</span>
-                     <div className="data-value" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                       <span 
-                         className="badge" 
-                         style={{ 
-                           minWidth: '160px',
-                           padding: '0.6rem 1.2rem',
-                           borderRadius: '8px',
-                           fontSize: '1rem',
-                           fontWeight: '900',
-                           letterSpacing: '0.05em',
-                           backgroundColor: (() => {
-                             const intensity = (data.sensor_raw.rain.intensity || '').toLowerCase();
-                             if (intensity.includes('heavy') || intensity.includes('high')) return '#d1493b';
-                             if (intensity.includes('mod')) return '#eab34e';
-                             return 'rgba(97, 187, 97, 0.8)';
-                           })(),
-                           color: '#fff',
-                           border: '2px solid rgba(255,255,255,0.2)',
-                           boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-                           textAlign: 'center'
-                         }}
-                       >
-                        {(() => {
-                           const intensity = (data.sensor_raw.rain.intensity || '').toLowerCase();
-                           if (intensity.includes('light') || intensity.includes('low')) return 'LOW RAINFALL';
-                           if (intensity.includes('heavy') || intensity.includes('high')) return 'HIGH RAINFALL';
-                           if (intensity.includes('mod')) return 'MODERATE RAINFALL';
-                           return 'NO RAIN';
-                        })()}
-                       </span>
-                       <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.8rem', color: 'var(--accent2)' }}>
-                          <span style={{ fontWeight: '600' }}>{data.sensor_raw.rain.intensity?.toUpperCase()} INTENSITY</span>
-                          <span style={{ opacity: 0.6 }}>Signal: {data.sensor_raw.rain.raw}</span>
-                       </div>
-                     </div>
-                  </div>
-                )}
                <div className="data-row" style={{ marginTop: '0.8rem', border: 'none', flexDirection: 'column', alignItems: 'flex-start' }}>
                  <span className="data-label" style={{ fontSize: '0.85rem' }}>Raw Soil Data Interface via Wi-Fi</span>
                  <pre style={{ 
@@ -540,7 +493,7 @@ function App() {
 
             {/* Requirements Card */}
             <div className="card">
-              <h2>🌿 {data.crop.charAt(0).toUpperCase() + data.crop.slice(1)} Requirements</h2>
+              <h2>🌿 {data.crop ? data.crop.charAt(0).toUpperCase() + data.crop.slice(1) : 'Crop'} Requirements</h2>
               {['N', 'P', 'K', 'pH'].map(param => {
                  const req = data.params[param];
                  if (!req) return null;
@@ -548,8 +501,8 @@ function App() {
                    <div className="data-row" key={'req'+param}>
                      <span className="data-label">{param === "pH" ? "pH" : param} Range</span>
                      <div className="data-value">
-                       <span>{req.required_min} &ndash; {req.required_max}</span>
-                       <span className="data-sub-value">(avg {req.required_mean})</span>
+                       <span>{safe(req.required_min)} &ndash; {safe(req.required_max)}</span>
+                       <span className="data-sub-value">(avg {safe(req.required_mean)})</span>
                      </div>
                    </div>
                  );
@@ -566,7 +519,7 @@ function App() {
               <div className="verdict-details">
                 {!data.suitable ? (
                   <>
-                    {data.issues.length > 0 && (
+                    {data.issues && data.issues.length > 0 && (
                       <div className="detail-section">
                         <h3 className="section-title serif">Issues Detected</h3>
                         <ul className="list-items issues">
@@ -574,7 +527,7 @@ function App() {
                         </ul>
                       </div>
                     )}
-                    {data.suggestions.length > 0 && (
+                    {data.suggestions && data.suggestions.length > 0 && (
                       <div className="detail-section">
                         <h3 className="section-title serif">Organic Treatments</h3>
                         <ul className="list-items suggestions">
@@ -594,7 +547,7 @@ function App() {
               </div>
             </div>
 
-            {/* AI Analysis Card */}
+            {/* AI Analysis Card (untouched per user request) */}
             {recommendationToggle && (
               <div className="card ai-card" style={{ gridColumn: '1 / -1', border: '1px solid var(--accent)' }}>
                 <h2 style={{ color: 'var(--accent)' }}>🤖 AI Soil Analysis</h2>

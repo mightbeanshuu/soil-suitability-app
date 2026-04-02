@@ -52,6 +52,8 @@ def read_sensor_data():
                 "P": random.randint(5, 145),
                 "K": random.randint(5, 205),
                 "pH": round(random.uniform(3.5, 9.5), 2),
-                "moisture": random.randint(10, 70)
+                "moisture": random.randint(10, 70),
+                "light_lux": random.randint(0, 100000),
+                "pressure_hpa": round(random.uniform(980.0, 1050.0), 1)
             }
             time.sleep(3)
