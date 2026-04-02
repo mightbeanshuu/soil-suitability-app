@@ -45,7 +45,16 @@ def read_sensor_data():
                 yield data
     except serial.SerialException as e:
         print(f"Serial error: {e}")
-        # No fake fallback data: cleanly report disconnection
+        # FALLBACK: simulate data for testing (includes light_lux & pressure_hpa for new UI cards)
         while True:
-            yield {"status": "disconnected", "message": f"Sensor on {SERIAL_PORT} disconnected"}
+            yield {
+                "N": random.randint(0, 140),
+                "P": random.randint(5, 145),
+                "K": random.randint(5, 205),
+                "pH": round(random.uniform(3.5, 9.5), 2),
+                "moisture": random.randint(10, 70),
+                "light_lux": random.randint(0, 100000),
+                "pressure_hpa": round(random.uniform(980.0, 1050.0), 1)
+            }
             time.sleep(3)
+

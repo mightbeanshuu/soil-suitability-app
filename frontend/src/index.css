@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;700;900&display=swap');
+
 :root {
   --bg: #0b150c;
   --surface: #142015;
@@ -12,6 +14,8 @@
   --muted: #8ca38f;
   --border: #2c422f;
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(20, 32, 21, 0.6);
+  --glass-border: rgba(97, 187, 97, 0.12);
 }
 
 * {
@@ -35,7 +39,18 @@ h1, h2, h3, h4, .serif {
   font-family: 'Playfair Display', serif;
 }
 
-/* Header */
+/* ─── NA Fallback ─── */
+.na-value {
+  color: var(--muted);
+  font-style: italic;
+  opacity: 0.6;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+/* ════════════════════════════════════
+   HEADER
+   ════════════════════════════════════ */
 .app-header {
   padding: 1.5rem 3rem;
   border-bottom: 1px solid var(--border);
@@ -62,6 +77,7 @@ h1, h2, h3, h4, .serif {
 .header-actions {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
 }
 
 .toggle-container {
@@ -176,7 +192,146 @@ input:checked + .slider:before {
   letter-spacing: 0.02em;
 }
 
-/* Main Content */
+/* ════════════════════════════════════
+   DISCONNECT BUTTON
+   ════════════════════════════════════ */
+.disconnect-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 50px;
+  border: 1px solid rgba(209, 73, 59, 0.3);
+  background: rgba(209, 73, 59, 0.1);
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.02em;
+}
+
+.disconnect-btn:hover {
+  background: rgba(209, 73, 59, 0.2);
+  border-color: var(--danger);
+  box-shadow: 0 0 20px rgba(209, 73, 59, 0.15);
+  transform: translateY(-1px);
+}
+
+.disconnect-btn--confirm {
+  background: rgba(209, 73, 59, 0.3);
+  border-color: var(--danger);
+  animation: confirm-pulse 1s ease infinite;
+}
+
+.disconnect-btn--loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.disconnect-btn-icon {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.disconnect-btn:hover .disconnect-btn-icon {
+  transform: rotate(180deg);
+}
+
+.disconnect-btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(209, 73, 59, 0.3);
+  border-top-color: var(--danger);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes confirm-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(209, 73, 59, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(209, 73, 59, 0); }
+}
+
+/* ════════════════════════════════════
+   CONNECTION STATUS BADGE
+   ════════════════════════════════════ */
+.connection-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  max-width: 320px;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.connection-status-badge--success {
+  background: rgba(40, 167, 69, 0.08);
+  border-color: rgba(40, 167, 69, 0.3);
+}
+
+.connection-status-badge--error {
+  background: rgba(255, 193, 7, 0.08);
+  border-color: rgba(255, 193, 7, 0.3);
+}
+
+.connection-status-badge--disconnected {
+  background: rgba(209, 73, 59, 0.08);
+  border-color: rgba(209, 73, 59, 0.3);
+}
+
+.connection-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.connection-status-badge--success .connection-status-dot {
+  background: #28a745;
+  box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+}
+
+.connection-status-badge--error .connection-status-dot {
+  background: #ffc107;
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+.connection-status-badge--disconnected .connection-status-dot {
+  background: var(--danger);
+  box-shadow: 0 0 8px rgba(209, 73, 59, 0.5);
+}
+
+.connection-status-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.connection-status-text strong {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.connection-status-badge--success .connection-status-text {
+  color: #28a745;
+}
+
+.connection-status-badge--error .connection-status-text {
+  color: #eab34e;
+}
+
+.connection-status-badge--disconnected .connection-status-text {
+  color: var(--danger);
+}
+
+/* ════════════════════════════════════
+   MAIN CONTENT
+   ════════════════════════════════════ */
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -227,14 +382,18 @@ input:checked + .slider:before {
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-/* Grid System */
+/* ════════════════════════════════════
+   GRID SYSTEM
+   ════════════════════════════════════ */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 1.5rem;
 }
 
-/* Cards */
+/* ════════════════════════════════════
+   BASE CARD
+   ════════════════════════════════════ */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -261,7 +420,478 @@ input:checked + .slider:before {
   gap: 0.5rem;
 }
 
-/* List Items visually formatted */
+/* ════════════════════════════════════
+   SENSOR CARD (Glassmorphic)
+   ════════════════════════════════════ */
+.sensor-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.8rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.sensor-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(97, 187, 97, 0.2), transparent);
+}
+
+.sensor-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  border-color: rgba(97, 187, 97, 0.25);
+}
+
+.sensor-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.sensor-card-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sensor-card-icon {
+  font-size: 1.5rem;
+}
+
+.sensor-card-status {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+}
+
+.sensor-card-status--online {
+  background: #28a745;
+  box-shadow: 0 0 6px rgba(40, 167, 69, 0.6);
+  animation: pulse-dot 2s ease infinite;
+}
+
+.sensor-card-status--offline {
+  background: var(--muted);
+}
+
+.sensor-card-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent2);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.sensor-card-body {
+  position: relative;
+}
+
+/* ════════════════════════════════════
+   WEATHER WIDGET
+   ════════════════════════════════════ */
+.weather-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0 1.5rem;
+  border-bottom: 1px solid rgba(44, 66, 47, 0.4);
+  margin-bottom: 1.2rem;
+}
+
+.weather-hero-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.weather-hero-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-hero-temp {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.weather-hero-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: 0.3rem;
+}
+
+.weather-readings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.weather-reading-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(44, 66, 47, 0.3);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.weather-reading-item:hover {
+  border-color: rgba(97, 187, 97, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.weather-reading-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.weather-reading-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-reading-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.weather-reading-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Rainfall Banner */
+.rainfall-banner {
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(234, 179, 78, 0.05);
+  border: 1px solid rgba(234, 179, 78, 0.15);
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rainfall-badge {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  text-align: center;
+  min-width: 140px;
+  transition: background-color 0.4s ease;
+}
+
+.rainfall-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rainfall-intensity {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent2);
+}
+
+.rainfall-signal {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* ── Weather Icon Animations ── */
+.weather-heavy-rain {
+  animation: rain-shake 0.6s ease-in-out infinite;
+}
+
+.weather-moderate-rain {
+  animation: rain-drip 1.5s ease infinite;
+}
+
+.weather-light-rain {
+  animation: cloud-drift 3s ease-in-out infinite;
+}
+
+.weather-sunny {
+  animation: sun-pulse 2s ease-in-out infinite;
+}
+
+.weather-partly {
+  animation: cloud-drift 4s ease-in-out infinite;
+}
+
+.weather-cloudy {
+  animation: cloud-drift 5s ease-in-out infinite;
+  opacity: 0.85;
+}
+
+.weather-clear {
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+
+@keyframes rain-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px) translateY(1px); }
+  75% { transform: translateX(2px) translateY(-1px); }
+}
+
+@keyframes rain-drip {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+@keyframes cloud-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08); filter: brightness(1.15); }
+}
+
+/* ════════════════════════════════════
+   LIGHT SENSOR CARD
+   ════════════════════════════════════ */
+.light-sensor-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 0;
+}
+
+.light-sensor-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.light-sensor-bulb {
+  font-size: 3rem;
+  transition: opacity 0.6s ease;
+  line-height: 1;
+}
+
+.light-sensor-glow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 220, 100, 0.4) 0%, transparent 70%);
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.light-sensor-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.light-sensor-value {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.light-sensor-unit {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.light-sensor-level {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.8rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.light-sensor-level--dark { background: rgba(100,100,100,0.15); color: #999; }
+.light-sensor-level--dim { background: rgba(180,150,80,0.15); color: #b4964f; }
+.light-sensor-level--indoor { background: rgba(234,179,78,0.15); color: var(--warn); }
+.light-sensor-level--bright { background: rgba(255,200,50,0.15); color: #f0c832; }
+.light-sensor-level--sunlight { background: rgba(255,160,30,0.2); color: #ffa01e; }
+.light-sensor-level--na { background: rgba(100,100,100,0.1); color: var(--muted); }
+
+/* Light brightness bar */
+.light-bar-container {
+  margin-top: 1.2rem;
+  width: 100%;
+}
+
+.light-bar-track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #333 0%, #665b2e 30%, #b4964f 50%, #f0c832 75%, #ffa01e 100%);
+  opacity: 0.3;
+  overflow: visible;
+}
+
+.light-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #555 0%, #b4964f 40%, #f0c832 70%, #ffa01e 100%);
+  opacity: 1;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.light-bar-indicator {
+  position: absolute;
+  top: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 2px solid var(--accent);
+  transform: translateX(-50%);
+  transition: left 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.light-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.65rem;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ════════════════════════════════════
+   BAROMETRIC PRESSURE CARD
+   ════════════════════════════════════ */
+.barometric-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.barometric-gauge-wrap {
+  position: relative;
+  width: 120px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.barometric-gauge-icon {
+  font-size: 2rem;
+  position: absolute;
+  bottom: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.barometric-arc {
+  width: 100%;
+  height: 100%;
+}
+
+.barometric-arc-fill {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.barometric-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.barometric-value {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.barometric-unit {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.barometric-level {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.8rem;
+  border-radius: 20px;
+}
+
+.barometric-level--low { background: rgba(234,179,78,0.15); color: var(--warn); }
+.barometric-level--normal { background: rgba(97,187,97,0.15); color: var(--accent); }
+.barometric-level--high { background: rgba(209,73,59,0.15); color: var(--danger); }
+.barometric-level--na { background: rgba(100,100,100,0.1); color: var(--muted); }
+
+.barometric-range {
+  margin-top: 0.8rem;
+}
+
+.barometric-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.barometric-range-low { color: var(--warn); }
+.barometric-range-normal { color: var(--accent); }
+.barometric-range-high { color: var(--danger); }
+
+/* ════════════════════════════════════
+   DATA ROWS
+   ════════════════════════════════════ */
 .data-row {
   display: flex;
   justify-content: space-between;
@@ -299,7 +929,9 @@ input:checked + .slider:before {
   font-weight: 400;
 }
 
-/* Badges */
+/* ════════════════════════════════════
+   BADGES
+   ════════════════════════════════════ */
 .badge {
   font-size: 0.75rem;
   padding: 0.35em 0.8em;
@@ -318,7 +950,9 @@ input:checked + .slider:before {
 .badge.status-acidic { background: rgba(234, 179, 78, 0.15); color: var(--warn); border: 1px solid rgba(234, 179, 78, 0.3); }
 .badge.status-alkaline { background: rgba(209, 73, 59, 0.15); color: var(--danger); border: 1px solid rgba(209, 73, 59, 0.3); }
 
-/* Verdict Card */
+/* ════════════════════════════════════
+   VERDICT CARD
+   ════════════════════════════════════ */
 .verdict-card {
   grid-column: 1 / -1;
   text-align: center;
@@ -426,7 +1060,9 @@ input:checked + .slider:before {
   color: var(--muted);
 }
 
-/* Spinner */
+/* ════════════════════════════════════
+   SPINNER
+   ════════════════════════════════════ */
 .spinner {
   width: 40px;
   height: 40px;
@@ -441,11 +1077,25 @@ input:checked + .slider:before {
   to { transform: rotate(360deg); }
 }
 
+/* ════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════ */
 @media (max-width: 768px) {
-  .app-header { padding: 1.25rem 1.5rem; }
+  .app-header { 
+    padding: 1.25rem 1.5rem; 
+    flex-wrap: wrap;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
   .main-content { padding: 1.5rem; }
   .verdict-title { font-size: 2.2rem; }
   .dashboard-grid { grid-template-columns: 1fr; }
   .controls { flex-direction: column; align-items: stretch; }
   .controls select { min-width: 100%; }
+  .weather-readings { grid-template-columns: 1fr; }
+  .weather-hero-icon { font-size: 2.5rem; }
+  .weather-hero-temp { font-size: 1.8rem; }
+  .connection-status-badge { max-width: 100%; }
 }
