@@ -1078,6 +1078,210 @@ input:checked + .slider:before {
 }
 
 /* ════════════════════════════════════
+   DATA CONTROLS (Recording & Export)
+   ════════════════════════════════════ */
+.data-controls {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+  transition: border-color 0.3s ease;
+}
+
+.data-controls:has(.record-btn--active) {
+  border-color: rgba(209, 73, 59, 0.3);
+  box-shadow: 0 0 20px rgba(209, 73, 59, 0.05);
+}
+
+.data-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.data-controls-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.data-controls-label {
+  font-size: 0.85rem;
+  color: var(--accent2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-controls-input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 120px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.data-controls-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.data-controls-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Record Button */
+.record-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.04em;
+}
+
+.record-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(209, 73, 59, 0.08);
+}
+
+.record-btn--active {
+  border-color: var(--danger);
+  background: rgba(209, 73, 59, 0.15);
+  color: var(--danger);
+  box-shadow: 0 0 12px rgba(209, 73, 59, 0.15);
+}
+
+.record-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background 0.3s ease;
+}
+
+.record-dot--active {
+  background: var(--danger);
+  animation: record-pulse 1s ease-in-out infinite;
+}
+
+@keyframes record-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(209, 73, 59, 0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(209, 73, 59, 0); }
+}
+
+.record-btn-text {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.data-controls-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+/* Download Button */
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: rgba(97, 187, 97, 0.08);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: rgba(97, 187, 97, 0.15);
+  box-shadow: 0 0 12px rgba(97, 187, 97, 0.15);
+  transform: translateY(-1px);
+}
+
+.download-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.download-btn-icon {
+  font-size: 1rem;
+}
+
+/* Download Feedback Toast */
+.download-feedback {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  animation: slide-up 0.3s ease;
+  white-space: nowrap;
+}
+
+.download-feedback--success {
+  background: rgba(97, 187, 97, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(97, 187, 97, 0.25);
+}
+
+.download-feedback--error {
+  background: rgba(209, 73, 59, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(209, 73, 59, 0.25);
+}
+
+/* Session Info Bar */
+.data-controls-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(44, 66, 47, 0.3);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.data-controls-info-item strong {
+  color: var(--accent2);
+}
+
+.data-controls-info-dot {
+  opacity: 0.4;
+}
+
+.data-controls-info-recording {
+  color: var(--danger);
+  font-weight: 600;
+  animation: record-pulse 1.5s ease-in-out infinite;
+}
+
+/* ════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════ */
 @media (max-width: 768px) {
@@ -1098,4 +1302,7 @@ input:checked + .slider:before {
   .weather-hero-icon { font-size: 2.5rem; }
   .weather-hero-temp { font-size: 1.8rem; }
   .connection-status-badge { max-width: 100%; }
+  .data-controls-row { flex-direction: column; align-items: stretch; }
+  .data-controls-divider { display: none; }
 }
+
