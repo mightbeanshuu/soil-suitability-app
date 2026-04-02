@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import './index.css';
 
-// New modular components
+// Modular components
 import DisconnectButton from './components/DisconnectButton';
 import WeatherWidget from './components/WeatherWidget';
 import LightSensor from './components/LightSensor';
 import BarometricPressure from './components/BarometricPressure';
+import DataControls from './components/DataControls';
 import { safe, hasValue } from './utils/sensorHelpers';
+import { flattenSensorReading, exportToExcel } from './utils/excelExport';
 
 const API_HTTP = "http://localhost:8000";
 
@@ -23,6 +25,17 @@ function App() {
   const [liveMode, setLiveMode] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
+  // ── Data Recording States ──
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedData, setRecordedData] = useState([]);
+  const [sessionInfo, setSessionInfo] = useState({ id: 1, name: 'test1', startTime: null });
+  
+  // Ref so the polling interval always sees current recording state
+  const isRecordingRef = useRef(false);
+  const sessionInfoRef = useRef(sessionInfo);
+  useEffect(() => { isRecordingRef.current = isRecording; }, [isRecording]);
+  useEffect(() => { sessionInfoRef.current = sessionInfo; }, [sessionInfo]);
+
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -33,6 +46,12 @@ function App() {
         fetch(`${API_HTTP}/sensor`)
           .then(res => res.json())
           .then(res => {
+             // ── Recording hook: capture data if recording is ON ──
+             if (isRecordingRef.current) {
+               const row = flattenSensorReading(res, sessionInfoRef.current.id, sessionInfoRef.current.name);
+               setRecordedData(prev => [...prev, row]);
+             }
+
              if (data) {
                 setData(prev => {
                    if (!prev) return prev;
@@ -242,6 +261,27 @@ function App() {
     setData(null);
   };
 
+  // ── Recording Controls ──
+  const handleToggleRecording = useCallback(() => {
+    if (!isRecording) {
+      // Starting a new recording session
+      setSessionInfo(prev => ({
+        ...prev,
+        id: prev.startTime ? prev.id + 1 : prev.id, // increment only if a previous session existed
+        startTime: new Date()
+      }));
+    }
+    setIsRecording(prev => !prev);
+  }, [isRecording]);
+
+  const handleDownload = useCallback(() => {
+    return exportToExcel(recordedData, sessionInfo.name, sessionInfo.startTime);
+  }, [recordedData, sessionInfo]);
+
+  const handleTestNameChange = useCallback((name) => {
+    setSessionInfo(prev => ({ ...prev, name: name || 'test' }));
+  }, []);
+
   return (
     <>
       <header className="app-header">
@@ -431,6 +471,18 @@ function App() {
             Evaluate for {selectedCrop}
           </button>
         </div>
+
+        {/* ── Data Recording Controls ── */}
+        <DataControls
+          isRecording={isRecording}
+          onToggleRecording={handleToggleRecording}
+          onDownload={handleDownload}
+          recordCount={recordedData.length}
+          sessionId={sessionInfo.id}
+          testName={sessionInfo.name}
+          onTestNameChange={handleTestNameChange}
+          sessionStart={sessionInfo.startTime}
+        />
 
         {error ? (
           <div className="card" style={{ borderColor: 'var(--danger)', textAlign: 'center' }}>
