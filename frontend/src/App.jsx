@@ -10,7 +10,7 @@ import DataControls from './components/DataControls';
 import { safe, hasValue } from './utils/sensorHelpers';
 import { flattenSensorReading, exportToCSV } from './utils/excelExport';
 
-const API_HTTP = "http://localhost:8000";
+const API_HTTP = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 function App() {
   const [crops, setCrops] = useState([]);
