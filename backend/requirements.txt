@@ -2,7 +2,7 @@ fastapi==0.111.0
 uvicorn[standard]==0.29.0
 pandas==2.2.2
 pyserial==3.5
-websockets==12.0
+websockets>=13.0
 anthropic>=0.3.0
 google-genai>=0.2.0
 python-multipart>=0.0.9
