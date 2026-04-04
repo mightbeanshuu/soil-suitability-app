@@ -16,6 +16,7 @@ A Next.js frontend and FastAPI backend collect data from physical sensors (Wi-Fi
 - **Sensor Telemetry:** Multithreaded Python workers hold persistent connections to hardware over Wi-Fi IP or Serial (COM ports)
 - **Rules Engine:** Compares live sensor readings against crop requirements from local datasets
 - **Logging:** Hardware connections are written to local JSON for offline debugging and telemetry
+- **Key Libraries:** `pyserial` and `websockets` for hardware communication, `pandas` for dataset manipulation, and `anthropic`/`google-genai` for AI-based soil evaluation.
 
 ## Running the Application
 
