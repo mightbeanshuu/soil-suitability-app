@@ -22,8 +22,15 @@ A Next.js frontend and FastAPI backend collect data from physical sensors (Wi-Fi
 ### 1. Start the Backend
 ```bash
 cd backend
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+
+# Install dependencies
 pip install -r requirements.txt
-python main.py
+
+# Run the FastAPI server
+uvicorn app.main:app --reload
 ```
 *Port 8000. Spawns the daemon ingestion loop on startup.*
 
