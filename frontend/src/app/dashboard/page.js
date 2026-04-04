@@ -41,6 +41,10 @@ export default function DashboardPage() {
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
 
+  // Live Webhook States
+  const [liveAiResult, setLiveAiResult] = useState(null);
+  const [liveAiLoading, setLiveAiLoading] = useState(false);
+
   // Restore sensor IP from session storage (set by Gateway page)
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -162,8 +166,8 @@ export default function DashboardPage() {
   };
 
   const triggerGeminiInsights = (sensorRaw) => {
-    setWebhookLoading(true);
-    setWebhookResult(null);
+    setLiveAiLoading(true);
+    setLiveAiResult(null);
 
     const headers = 'N,P,K,pH,moisture';
     const values = [
@@ -188,13 +192,13 @@ export default function DashboardPage() {
       .then(res => res.json())
       .then(res => {
         if (res.status === 'success') {
-          setWebhookResult(res.ai_verdict);
+          setLiveAiResult(res.ai_verdict);
         } else {
-          setWebhookResult(`Gemini Error: ${res.message}`);
+          setLiveAiResult(`Gemini Error: ${res.message}`);
         }
       })
-      .catch(err => setWebhookResult(`Network Error: ${err.message}`))
-      .finally(() => setWebhookLoading(false));
+      .catch(err => setLiveAiResult(`Network Error: ${err.message}`))
+      .finally(() => setLiveAiLoading(false));
   };
 
   const fetchAiAnalysis = (params) => {
@@ -551,9 +555,25 @@ export default function DashboardPage() {
             {recommendationToggle && (
               <div className="card" style={{ gridColumn: '1 / -1', border: '1px solid var(--accent)' }}>
                 <h2 style={{ color: 'var(--accent)' }}>Gemini AI Soil Insights</h2>
-                <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--muted)' }}>
-                  Coming soon... (Webhook insights currently isolated)
-                </p>
+                {liveAiLoading ? (
+                  <p style={{ textAlign: 'center', padding: '1rem' }}>Gemini is analyzing your live sensor data...</p>
+                ) : liveAiResult ? (
+                  <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <pre style={{
+                      whiteSpace: 'pre-wrap',
+                      fontFamily: 'inherit',
+                      fontSize: '0.95rem',
+                      color: 'var(--text)',
+                      lineHeight: 1.7
+                    }}>
+                      {liveAiResult}
+                    </pre>
+                  </div>
+                ) : (
+                  <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--muted)' }}>
+                    Toggle AI Insights when sensor data is connected to get a Gemini analysis.
+                  </p>
+                )}
               </div>
             )}
 
