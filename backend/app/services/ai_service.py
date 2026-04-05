@@ -1,14 +1,24 @@
 import os
 import json
-import anthropic
+from google import genai
+from dotenv import load_dotenv
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+load_dotenv()
+
+try:
+    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY", ""))
+except Exception as e:
+    client = None
+    print(f"Gemini API Config Warning: {e}")
 
 def analyze_soil_data(sensor_data: dict) -> dict:
     """
-    Sends sensor JSON to Claude and returns AI-powered soil analysis.
+    Sends sensor JSON to Gemini and returns AI-powered soil analysis.
     sensor_data example: {"N": 85, "P": 42, "K": 43, "pH": 6.5, "moisture": 38}
     """
+    if not client:
+        raise RuntimeError("Google Gemini client is not initialized. Check your GOOGLE_API_KEY.")
+
     # Security: Mitigate Prompt Injection
     # We strictly extract and cast only expected numeric fields. Any extra malicious payload keys are discarded.
     try:
@@ -56,13 +66,12 @@ Respond ONLY in valid JSON format (no markdown, no extra text):
 }}
 """
 
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1500,
-        messages=[{"role": "user", "content": prompt}],
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=prompt,
     )
 
-    text = response.content[0].text.strip()
+    text = response.text.strip()
 
     # Extract JSON block if wrapped in markdown
     if "```" in text:
